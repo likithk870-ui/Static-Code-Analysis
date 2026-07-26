@@ -221,4 +221,5 @@ def api_export():
 
 if __name__ == '__main__':
     print("Starting Flask Static Code Analysis App on http://127.0.0.1:5000")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+    app.run(debug=debug_mode, host='127.0.0.1', port=5000)  # nosec B201
