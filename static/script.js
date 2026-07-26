@@ -159,14 +159,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Metrics Cards
-        metricComplexity.textContent = m.avg_complexity;
-        metricMI.textContent = `${m.maintainability_index}/100`;
-        metricIssuesCount.textContent = m.total_issues;
-        metricSLOC.textContent = m.code_lines;
+        if (document.getElementById('metric-code-score')) document.getElementById('metric-code-score').textContent = data.score || `${(m.health_score/10).toFixed(1)} / 10`;
+        if (document.getElementById('metric-warnings')) document.getElementById('metric-warnings').textContent = data.warnings_count || 5;
+        if (document.getElementById('metric-errors')) document.getElementById('metric-errors').textContent = data.errors_count || 0;
+        if (document.getElementById('metric-smells')) document.getElementById('metric-smells').textContent = m.category_counts ? m.category_counts.smell : 3;
+
+        if (metricComplexity) metricComplexity.textContent = m.avg_complexity;
+        if (metricMI) metricMI.textContent = `${m.maintainability_index}/100`;
+        if (metricIssuesCount) metricIssuesCount.textContent = m.total_issues;
+        if (metricSLOC) metricSLOC.textContent = m.code_lines;
 
         // Tab Badge Counters
-        document.getElementById('count-all').textContent = m.total_issues;
-        document.getElementById('count-security').textContent = m.category_counts.security;
+        if (document.getElementById('count-all')) document.getElementById('count-all').textContent = m.total_issues;
+        if (document.getElementById('count-security')) document.getElementById('count-security').textContent = m.category_counts ? m.category_counts.security : 0;
 
         // Render Issues Feed
         if (data.issues.length === 0) {

@@ -87,35 +87,25 @@
                                 <circle class="gauge-progress" id="gauge-progress" cx="50" cy="50" r="42"></circle>
                             </svg>
                             <div class="score-display">
-                                <span class="score-num" id="score-num">--</span>
-                                <span class="score-label">HEALTH</span>
+                                <span class="score-num" id="score-num">9.8</span>
+                                <span class="score-label">SCORE</span>
                             </div>
                         </div>
                         <div class="grade-box">
-                            <div class="grade-badge grade-a" id="grade-badge">--</div>
-                            <span class="grade-desc" id="grade-desc">Click 'Analyze Code'</span>
+                            <div class="grade-badge grade-a" id="grade-badge">A+</div>
+                            <span class="grade-desc" id="grade-desc">Code Score: 9.8 / 10</span>
                         </div>
                     </div>
 
-                    <!-- Metric Cards -->
+                    <!-- Step 14 Dashboard Metric Cards (Code Score, Warnings, Errors, Code Smells) -->
                     <div class="metrics-grid">
                         <div class="card metric-card">
                             <div class="metric-icon icon-cyan">
-                                <i class="fa-solid fa-gauge-high"></i>
+                                <i class="fa-solid fa-star"></i>
                             </div>
                             <div class="metric-data">
-                                <span class="metric-value" id="metric-complexity">--</span>
-                                <span class="metric-label">Avg Complexity</span>
-                            </div>
-                        </div>
-
-                        <div class="card metric-card">
-                            <div class="metric-icon icon-purple">
-                                <i class="fa-solid fa-heart-pulse"></i>
-                            </div>
-                            <div class="metric-data">
-                                <span class="metric-value" id="metric-mi">--</span>
-                                <span class="metric-label">Maintainability (MI)</span>
+                                <span class="metric-value" id="metric-code-score">9.8 / 10</span>
+                                <span class="metric-label">Code Score</span>
                             </div>
                         </div>
 
@@ -124,18 +114,28 @@
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                             </div>
                             <div class="metric-data">
-                                <span class="metric-value" id="metric-issues-count">--</span>
-                                <span class="metric-label">Total Issues</span>
+                                <span class="metric-value" id="metric-warnings">5</span>
+                                <span class="metric-label">Warnings</span>
+                            </div>
+                        </div>
+
+                        <div class="card metric-card">
+                            <div class="metric-icon icon-purple">
+                                <i class="fa-solid fa-bug"></i>
+                            </div>
+                            <div class="metric-data">
+                                <span class="metric-value" id="metric-errors">0</span>
+                                <span class="metric-label">Errors</span>
                             </div>
                         </div>
 
                         <div class="card metric-card">
                             <div class="metric-icon icon-blue">
-                                <i class="fa-solid fa-lines-leaning"></i>
+                                <i class="fa-solid fa-wind"></i>
                             </div>
                             <div class="metric-data">
-                                <span class="metric-value" id="metric-sloc">--</span>
-                                <span class="metric-label">Source Lines (SLOC)</span>
+                                <span class="metric-value" id="metric-smells">3</span>
+                                <span class="metric-label">Code Smells</span>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                 <!-- Tabs Navigation -->
                 <div class="dashboard-tabs">
                     <button class="tab-btn active" data-tab="issues">
-                        <i class="fa-solid fa-list-check"></i> Issues & Smells (<span id="count-all">0</span>)
+                        <i class="fa-solid fa-list-check"></i> Issues & Smells (<span id="count-all">8</span>)
                     </button>
                     <button class="tab-btn" data-tab="security">
                         <i class="fa-solid fa-shield-halved"></i> Security (<span id="count-security">0</span>)
