@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyPulse — Static Code Analyzer & Code Smell Detector</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="navbar">
+            <div class="nav-brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-code-compare"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>PyPulse <span class="badge-tag">Static Analyzer</span></h1>
+                    <p class="tagline">Python Code Quality, Security & AST Metrics Suite</p>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <button id="btn-load-sample" class="btn btn-secondary" title="Load sample calculator.py file">
+                    <i class="fa-solid fa-flask"></i> Load Sample (calculator.py)
+                </button>
+                <label for="file-upload-input" class="btn btn-secondary" title="Upload custom .py file">
+                    <i class="fa-solid fa-file-arrow-up"></i> Upload .py File
+                    <input type="file" id="file-upload-input" accept=".py,.txt" hidden>
+                </label>
+                <button id="btn-export-report" class="btn btn-secondary" title="Download Analysis Report">
+                    <i class="fa-solid fa-download"></i> Export JSON
+                </button>
+                <button id="btn-run-analysis" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i> Analyze Code
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workbench Workspace -->
+        <main class="workbench">
+            <!-- Left Pane: Code Editor Section -->
+            <section class="pane editor-pane">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <i class="fa-solid fa-file-code"></i>
+                        <span id="current-filename">calculator.py</span>
+                        <span class="file-status" id="file-status">Ready</span>
+                    </div>
+                    <div class="editor-tools">
+                        <button id="btn-clear-editor" class="icon-btn" title="Clear Code">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button id="btn-copy-code" class="icon-btn" title="Copy Code">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                        <span class="line-counter-badge" id="line-counter-badge">0 lines</span>
+                    </div>
+                </div>
+
+                <div class="editor-container" id="editor-dropzone">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="code-input" spellcheck="false" placeholder="Paste or type Python code here to run static analysis..."></textarea>
+                </div>
+                
+                <div class="editor-footer">
+                    <span class="tip-text"><i class="fa-solid fa-circle-info"></i> Drag & drop a <code>.py</code> file into the editor to analyze automatically.</span>
+                </div>
+            </section>
+
+            <!-- Right Pane: Analysis Dashboard -->
+            <section class="pane dashboard-pane">
+                <!-- Overview Stats & Health Grade -->
+                <div class="dashboard-header-cards">
+                    <!-- Health Score Gauge -->
+                    <div class="card score-card">
+                        <div class="gauge-box">
+                            <svg class="gauge-ring" viewBox="0 0 100 100">
+                                <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                                <circle class="gauge-progress" id="gauge-progress" cx="50" cy="50" r="42"></circle>
+                            </svg>
+                            <div class="score-display">
+                                <span class="score-num" id="score-num">--</span>
+                                <span class="score-label">HEALTH</span>
+                            </div>
+                        </div>
+                        <div class="grade-box">
+                            <div class="grade-badge grade-a" id="grade-badge">--</div>
+                            <span class="grade-desc" id="grade-desc">Click 'Analyze Code'</span>
+                        </div>
+                    </div>
+
+                    <!-- Metric Cards -->
+                    <div class="metrics-grid">
+                        <div class="card metric-card">
+                            <div class="metric-icon icon-cyan">
+                                <i class="fa-solid fa-gauge-high"></i>
+                            </div>
+                            <div class="metric-data">
+                                <span class="metric-value" id="metric-complexity">--</span>
+                                <span class="metric-label">Avg Complexity</span>
+                            </div>
+                        </div>
+
+                        <div class="card metric-card">
+                            <div class="metric-icon icon-purple">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <div class="metric-data">
+                                <span class="metric-value" id="metric-mi">--</span>
+                                <span class="metric-label">Maintainability (MI)</span>
+                            </div>
+                        </div>
+
+                        <div class="card metric-card">
+                            <div class="metric-icon icon-amber">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div class="metric-data">
+                                <span class="metric-value" id="metric-issues-count">--</span>
+                                <span class="metric-label">Total Issues</span>
+                            </div>
+                        </div>
+
+                        <div class="card metric-card">
+                            <div class="metric-icon icon-blue">
+                                <i class="fa-solid fa-lines-leaning"></i>
+                            </div>
+                            <div class="metric-data">
+                                <span class="metric-value" id="metric-sloc">--</span>
+                                <span class="metric-label">Source Lines (SLOC)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="dashboard-tabs">
+                    <button class="tab-btn active" data-tab="issues">
+                        <i class="fa-solid fa-list-check"></i> Issues & Smells (<span id="count-all">0</span>)
+                    </button>
+                    <button class="tab-btn" data-tab="security">
+                        <i class="fa-solid fa-shield-halved"></i> Security (<span id="count-security">0</span>)
+                    </button>
+                    <button class="tab-btn" data-tab="structure">
+                        <i class="fa-solid fa-sitemap"></i> Structure & Complexity
+                    </button>
+                    <button class="tab-btn" data-tab="breakdown">
+                        <i class="fa-solid fa-chart-pie"></i> Lines & Metrics
+                    </button>
+                </div>
+
+                <!-- Tab Content 1: Issues Feed -->
+                <div class="tab-content active" id="tab-issues">
+                    <div class="issue-filter-bar">
+                        <span class="filter-label">Filter Severity:</span>
+                        <button class="chip chip-filter active" data-severity="all">All</button>
+                        <button class="chip chip-filter" data-severity="critical">Critical</button>
+                        <button class="chip chip-filter" data-severity="warning">Warning</button>
+                        <button class="chip chip-filter" data-severity="info">Info</button>
+                    </div>
+
+                    <div class="issues-list" id="issues-list">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <h3>No Analysis Run Yet</h3>
+                            <p>Click "Analyze Code" or load a sample file to view static inspection results.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content 2: Security Warnings -->
+                <div class="tab-content" id="tab-security">
+                    <div class="security-panel" id="security-list">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-shield-cat"></i>
+                            <h3>Security Scan Ready</h3>
+                            <p>Run analysis to check for eval(), shell injection, or hardcoded secrets.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content 3: Functions & Structure -->
+                <div class="tab-content" id="tab-structure">
+                    <div class="structure-grid">
+                        <div class="structure-card">
+                            <h3><i class="fa-solid fa-cubes"></i> Function Complexity Breakdown</h3>
+                            <div class="table-responsive">
+                                <table class="data-table" id="table-functions">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>Line</th>
+                                            <th>Length</th>
+                                            <th>Params</th>
+                                            <th>Complexity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="5" class="text-muted">No functions analyzed yet</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="structure-card">
+                            <h3><i class="fa-solid fa-box-archive"></i> Classes Detected</h3>
+                            <ul class="class-list" id="list-classes">
+                                <li class="text-muted">No classes detected</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content 4: Lines & Code Breakdown -->
+                <div class="tab-content" id="tab-breakdown">
+                    <div class="breakdown-grid">
+                        <div class="breakdown-card">
+                            <h3><i class="fa-solid fa-chart-simple"></i> Code Distribution</h3>
+                            <div class="stat-bar-group">
+                                <div class="stat-bar-item">
+                                    <div class="bar-header">
+                                        <span>Code Lines (SLOC)</span>
+                                        <span id="stat-sloc-val">0</span>
+                                    </div>
+                                    <div class="bar-track"><div class="bar-fill fill-cyan" id="bar-sloc" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="stat-bar-item">
+                                    <div class="bar-header">
+                                        <span>Comment Lines</span>
+                                        <span id="stat-comments-val">0</span>
+                                    </div>
+                                    <div class="bar-track"><div class="bar-fill fill-purple" id="bar-comments" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="stat-bar-item">
+                                    <div class="bar-header">
+                                        <span>Blank Lines</span>
+                                        <span id="stat-blank-val">0</span>
+                                    </div>
+                                    <div class="bar-track"><div class="bar-fill fill-dark" id="bar-blank" style="width: 0%;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script File -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
