@@ -1,6 +1,8 @@
+"""
+PyPulse Static Code Analysis Server and AST Analysis Engine.
+"""
+
 import ast
-import json
-import math
 import os
 import re
 import sys
@@ -15,11 +17,11 @@ def run_pylint_analysis(filepath="calculator.py"):
         result = subprocess.run(
             [sys.executable, "-m", "pylint", filepath],
             capture_output=True,
-            text=True
+            text=True,
+            check=False
         )
         output = result.stdout
         
-        # Extract score
         score_match = re.search(r'rated at (-?\d+\.\d+)/10', output)
         score = float(score_match.group(1)) if score_match else 10.0
         score = max(0.0, score)
@@ -52,6 +54,8 @@ def run_pylint_analysis(filepath="calculator.py"):
         }
 
 class ASTAnalyzer(ast.NodeVisitor):
+    """AST Node Visitor to identify code smells and security risks."""
+
     def __init__(self, code):
         self.code = code
         self.issues = []
@@ -59,6 +63,7 @@ class ASTAnalyzer(ast.NodeVisitor):
         self.classes = []
 
     def add_issue(self, issue_type, category, line, message, suggestion="", severity="warning"):
+        """Appends an identified issue to the analyzer issues list."""
         self.issues.append({
             "type": issue_type,
             "category": category,
@@ -69,6 +74,7 @@ class ASTAnalyzer(ast.NodeVisitor):
         })
 
     def visit_FunctionDef(self, node):
+        """Visits function definitions to check for docstrings."""
         func_name = node.name
         if not ast.get_docstring(node):
             self.add_issue("Missing Docstring", "smell", node.lineno,
@@ -77,6 +83,7 @@ class ASTAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node):
+        """Visits function calls to check for security vulnerabilities."""
         if isinstance(node.func, ast.Name) and node.func.id in ("eval", "exec"):
             self.add_issue("Dynamic Code Execution", "security", node.lineno,
                            f"Use of '{node.func.id}()' detected.",
@@ -85,6 +92,7 @@ class ASTAnalyzer(ast.NodeVisitor):
 
 
 def perform_full_analysis(code):
+    """Performs static code inspection and returns metrics and issue scores."""
     if not code or not code.strip():
         return {
             "score": "10.0 / 10",
@@ -93,7 +101,14 @@ def perform_full_analysis(code):
             "errors_count": 0,
             "warnings_count": 0,
             "issues": [],
-            "metrics": {"total_lines": 0, "code_lines": 0, "comment_lines": 0, "blank_lines": 0, "avg_complexity": 1.0, "maintainability_index": 100}
+            "metrics": {
+                "total_lines": 0,
+                "code_lines": 0,
+                "comment_lines": 0,
+                "blank_lines": 0,
+                "avg_complexity": 1.0,
+                "maintainability_index": 100
+            }
         }
 
     issues = []
@@ -119,11 +134,16 @@ def perform_full_analysis(code):
     pylint_score = max(0.0, round(10.0 - penalty, 2))
     health_score = max(0, min(100, int(pylint_score * 10)))
 
-    if pylint_score >= 9.0: grade = "A+"
-    elif pylint_score >= 8.0: grade = "A"
-    elif pylint_score >= 7.0: grade = "B"
-    elif pylint_score >= 5.0: grade = "C"
-    else: grade = "F"
+    if pylint_score >= 9.0:
+        grade = "A+"
+    elif pylint_score >= 8.0:
+        grade = "A"
+    elif pylint_score >= 7.0:
+        grade = "B"
+    elif pylint_score >= 5.0:
+        grade = "C"
+    else:
+        grade = "F"
 
     lines = code.splitlines()
     code_lines = sum(1 for l in lines if l.strip() and not l.strip().startswith('#'))
@@ -160,12 +180,14 @@ def perform_full_analysis(code):
 
 @app.route('/')
 def index():
+    """Renders the main web dashboard with Pylint inspection report."""
     report = run_pylint_analysis('calculator.py')
     return render_template('index.html', report=report)
 
 
 @app.route('/api/analyze', methods=['POST'])
 def api_analyze():
+    """REST API endpoint to analyze code snippets."""
     data = request.get_json(silent=True) or {}
     code = data.get('code', '')
     if not code and 'file' in request.files:
@@ -177,6 +199,7 @@ def api_analyze():
 
 @app.route('/api/sample', methods=['GET'])
 def api_sample():
+    """REST API endpoint returning sample calculator.py code."""
     sample_path = os.path.join(os.path.dirname(__file__), 'calculator.py')
     if os.path.exists(sample_path):
         with open(sample_path, 'r', encoding='utf-8') as f:
@@ -187,6 +210,7 @@ def api_sample():
 
 @app.route('/api/export', methods=['POST'])
 def api_export():
+    """REST API endpoint exporting JSON analysis report."""
     data = request.get_json(silent=True) or {}
     code = data.get('code', '')
     analysis = perform_full_analysis(code)
