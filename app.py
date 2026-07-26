@@ -1,3 +1,4 @@
-from calculator import add
+a=10
+b=20
 
-print(add(10, 20))
+print(a+b)
