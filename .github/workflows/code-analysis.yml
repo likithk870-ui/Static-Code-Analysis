@@ -4,25 +4,28 @@ on:
   push:
     branches:
       - main
+      - master
   pull_request:
     branches:
       - main
+      - master
 
 jobs:
   analyze:
-
     runs-on: ubuntu-latest
 
     steps:
-
     - uses: actions/checkout@v4
 
     - uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    - run: pip install -r requirements.txt
-
-    - name: Run Pylint Code Analysis
+    - name: Install Dependencies
       run: |
-        pylint calculator.py app.py || true
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Pylint Analysis
+      run: |
+        pylint *.py --exit-zero || true
